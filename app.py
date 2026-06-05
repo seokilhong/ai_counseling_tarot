@@ -7,7 +7,7 @@ from PIL import Image
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMG_DIR = os.path.join(BASE_DIR, "images")
-CHARACTER_IMG = os.path.join(BASE_DIR, "character.png")
+CHARACTER_IMG = os.path.join(BASE_DIR, "character_small.png")
 
 # 메이저 아르카나 22장: (표시명, 이미지 파일명)
 MAJOR_ARCANA = [
