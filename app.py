@@ -77,7 +77,7 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
 
 def speak(text: str):
     """캐릭터 프사 + 말풍선 텍스트 한 줄 (카톡식)."""
-    col_a, col_b = st.columns([1, 6])
+    col_a, col_b = st.columns([1, 13])
     with col_a:
         st.image(AVATAR)
     with col_b:
@@ -132,6 +132,18 @@ if st.button("카드 뽑기", type="primary"):
     with st.spinner("카드를 읽는 중..."):
         reading = read_card(concern, name, orientation, api_key)
 
-    for para in reading.split("\n\n"):
-        if para.strip():
-            speak(para.strip())
+    # 굵은 소제목(**)이 시작될 때만 새 묶음 → 소제목+내용을 한 말풍선으로
+    sections = []
+    current = []
+    for line in reading.split("\n"):
+        if line.strip().startswith("**") and current:
+            sections.append("\n".join(current).strip())
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        sections.append("\n".join(current).strip())
+
+    for sec in sections:
+        if sec.strip():
+            speak(sec)
