@@ -3,34 +3,36 @@ import random
 
 import streamlit as st
 import anthropic
+from PIL import Image
 
-# 메이저 아르카나 22장 (MVP는 메이저만)
+# 메이저 아르카나 22장: (표시명, 이미지 파일명)
 MAJOR_ARCANA = [
-    "0. 바보 (The Fool)",
-    "1. 마법사 (The Magician)",
-    "2. 여사제 (The High Priestess)",
-    "3. 여황제 (The Empress)",
-    "4. 황제 (The Emperor)",
-    "5. 교황 (The Hierophant)",
-    "6. 연인 (The Lovers)",
-    "7. 전차 (The Chariot)",
-    "8. 힘 (Strength)",
-    "9. 은둔자 (The Hermit)",
-    "10. 운명의 수레바퀴 (Wheel of Fortune)",
-    "11. 정의 (Justice)",
-    "12. 매달린 사람 (The Hanged Man)",
-    "13. 죽음 (Death)",
-    "14. 절제 (Temperance)",
-    "15. 악마 (The Devil)",
-    "16. 탑 (The Tower)",
-    "17. 별 (The Star)",
-    "18. 달 (The Moon)",
-    "19. 태양 (The Sun)",
-    "20. 심판 (Judgement)",
-    "21. 세계 (The World)",
+    ("0. 바보 (The Fool)", "RWS_Tarot_00_Fool.jpg"),
+    ("1. 마법사 (The Magician)", "RWS_Tarot_01_Magician.jpg"),
+    ("2. 여사제 (The High Priestess)", "RWS_Tarot_02_High_Priestess.jpg"),
+    ("3. 여황제 (The Empress)", "RWS_Tarot_03_Empress.jpg"),
+    ("4. 황제 (The Emperor)", "RWS_Tarot_04_Emperor.jpg"),
+    ("5. 교황 (The Hierophant)", "RWS_Tarot_05_Hierophant.jpg"),
+    ("6. 연인 (The Lovers)", "RWS_Tarot_06_Lovers.jpg"),
+    ("7. 전차 (The Chariot)", "RWS_Tarot_07_Chariot.jpg"),
+    ("8. 힘 (Strength)", "RWS_Tarot_08_Strength.jpg"),
+    ("9. 은둔자 (The Hermit)", "RWS_Tarot_09_Hermit.jpg"),
+    ("10. 운명의 수레바퀴 (Wheel of Fortune)", "RWS_Tarot_10_Wheel_of_Fortune.jpg"),
+    ("11. 정의 (Justice)", "RWS_Tarot_11_Justice.jpg"),
+    ("12. 매달린 사람 (The Hanged Man)", "RWS_Tarot_12_Hanged_Man.jpg"),
+    ("13. 죽음 (Death)", "RWS_Tarot_13_Death.jpg"),
+    ("14. 절제 (Temperance)", "RWS_Tarot_14_Temperance.jpg"),
+    ("15. 악마 (The Devil)", "RWS_Tarot_15_Devil.jpg"),
+    ("16. 탑 (The Tower)", "RWS_Tarot_16_Tower.jpg"),
+    ("17. 별 (The Star)", "RWS_Tarot_17_Star.jpg"),
+    ("18. 달 (The Moon)", "RWS_Tarot_18_Moon.jpg"),
+    ("19. 태양 (The Sun)", "RWS_Tarot_19_Sun.jpg"),
+    ("20. 심판 (Judgement)", "RWS_Tarot_20_Judgement.jpg"),
+    ("21. 세계 (The World)", "RWS_Tarot_21_World.jpg"),
 ]
 
 MODEL = "claude-haiku-4-5-20251001"  # 타로 해석은 가벼워서 haiku로 충분
+IMG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images")
 
 
 def get_api_key():
@@ -38,7 +40,6 @@ def get_api_key():
     key = os.environ.get("ANTHROPIC_API_KEY")
     if key:
         return key
-    # st.secrets는 secrets 파일이 없으면 접근 시 예외를 던지므로 감싼다
     try:
         return st.secrets["ANTHROPIC_API_KEY"]
     except Exception:
@@ -76,9 +77,15 @@ if st.button("카드 뽑기", type="primary"):
         st.warning("고민을 한 줄 적어주세요.")
         st.stop()
 
-    card = random.choice(MAJOR_ARCANA)
+    name, filename = random.choice(MAJOR_ARCANA)
     orientation = random.choice(["정방향", "역방향"])
-    st.markdown(f"### 뽑힌 카드 — {card} · {orientation}")
+
+    img = Image.open(os.path.join(IMG_DIR, filename))
+    if orientation == "역방향":
+        img = img.rotate(180)
+
+    st.markdown(f"### {name} · {orientation}")
+    st.image(img, width=300)
 
     api_key = get_api_key()
     if not api_key:
@@ -91,6 +98,6 @@ if st.button("카드 뽑기", type="primary"):
         st.stop()
 
     with st.spinner("카드를 읽는 중..."):
-        reading = read_card(concern, card, orientation, api_key)
+        reading = read_card(concern, name, orientation, api_key)
 
     st.write(reading)
