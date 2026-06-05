@@ -50,15 +50,21 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
     client = anthropic.Anthropic(api_key=api_key)
     prompt = (
         "당신은 따뜻하지만 막연하지 않은 타로 리더입니다. "
-        "사용자의 고민과 뽑힌 카드를 연결해 5~7문장으로 해석해 주세요. "
-        "일반론이 아니라 이 고민에 맞춘 구체적인 메시지를 주고, 마지막 한 문장은 행동 제안으로 끝내세요.\n\n"
+        "사용자의 고민과 뽑힌 카드를 바탕으로, 아래 다섯 항목을 각각 굵은 제목으로 구분해 해석해 주세요. "
+        "각 항목은 굵은 제목 뒤에 1~2문장으로 짧게 쓰고, 항목과 항목 사이는 반드시 빈 줄로 띄웁니다. "
+        "일반론이 아니라 이 고민에 맞춘 구체적인 메시지를 주세요.\n\n"
+        "**1. 지금 당신의 상황**\n"
+        "**2. 그 밑에 깔린 마음**\n"
+        "**3. 이 카드의 의미** (정방향/역방향 포함)\n"
+        "**4. 카드와 당신의 연결**\n"
+        "**5. 오늘 해볼 행동** (구체적인 행동 하나)\n\n"
         f"고민: {concern}\n"
         f"뽑힌 카드: {card} ({orientation})\n\n"
         "해석:"
     )
     msg = client.messages.create(
         model=MODEL,
-        max_tokens=600,
+        max_tokens=800,
         messages=[{"role": "user", "content": prompt}],
     )
     return msg.content[0].text
