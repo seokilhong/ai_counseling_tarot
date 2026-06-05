@@ -75,6 +75,15 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
     return msg.content[0].text
 
 
+def speak(text: str):
+    """캐릭터 프사 + 말풍선 텍스트 한 줄 (카톡식)."""
+    col_a, col_b = st.columns([1, 6])
+    with col_a:
+        st.image(AVATAR)
+    with col_b:
+        st.markdown(text)
+
+
 st.set_page_config(page_title="타로 한 장", page_icon="🔮")
 
 st.title("🔮 타로 한 장")
@@ -115,11 +124,7 @@ if st.button("카드 뽑기", type="primary"):
         )
         st.stop()
 
-    intro_l, intro_r = st.columns([1, 6])
-    with intro_l:
-        st.image(AVATAR)
-    with intro_r:
-        st.markdown("당신의 고민, 잘 들었어요.\n\n카드를 한 장 펼쳐볼게요...")
+    speak("당신의 고민, 잘 들었어요. 카드를 한 장 펼쳐볼게요...")
 
     st.image(card_img, width=200)
     st.markdown(f"**{name} · {orientation}**")
@@ -127,8 +132,6 @@ if st.button("카드 뽑기", type="primary"):
     with st.spinner("카드를 읽는 중..."):
         reading = read_card(concern, name, orientation, api_key)
 
-    read_l, read_r = st.columns([1, 6])
-    with read_l:
-        st.image(AVATAR)
-    with read_r:
-        st.markdown(reading)
+    for para in reading.split("\n\n"):
+        if para.strip():
+            speak(para.strip())
