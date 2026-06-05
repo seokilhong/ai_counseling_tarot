@@ -114,12 +114,8 @@ if st.button("카드 뽑기", type="primary"):
         )
         st.stop()
 
-    with st.chat_message("assistant", avatar="🔮"):
-        col_char, col_intro = st.columns([1, 3])
-        with col_char:
-            st.image(CHARACTER_IMG)
-        with col_intro:
-            st.markdown("당신의 고민, 잘 들었어요.\n\n카드를 한 장 펼쳐볼게요...")
+    with st.chat_message("assistant", avatar=Image.open(CHARACTER_IMG)):
+        st.markdown("당신의 고민, 잘 들었어요. 카드를 한 장 펼쳐볼게요...")
         st.image(card_img, width=240)
         st.markdown(f"**{name} · {orientation}**")
         with st.spinner("카드를 읽는 중..."):
