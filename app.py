@@ -8,6 +8,7 @@ from PIL import Image
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMG_DIR = os.path.join(BASE_DIR, "images")
 CHARACTER_IMG = os.path.join(BASE_DIR, "character_small.png")
+AVATAR = os.path.join(BASE_DIR, "avatar.png")  # 말풍선 옆 얼굴 프사
 
 # 메이저 아르카나 22장: (표시명, 이미지 파일명)
 MAJOR_ARCANA = [
@@ -114,11 +115,20 @@ if st.button("카드 뽑기", type="primary"):
         )
         st.stop()
 
-    with st.container(border=True):
-        st.image(CHARACTER_IMG, width=110)
-        st.markdown("**타로술사**  ·  당신의 고민, 잘 들었어요. 카드를 한 장 펼쳐볼게요...")
-        st.image(card_img, width=240)
-        st.markdown(f"**{name} · {orientation}**")
-        with st.spinner("카드를 읽는 중..."):
-            reading = read_card(concern, name, orientation, api_key)
+    intro_l, intro_r = st.columns([1, 6])
+    with intro_l:
+        st.image(AVATAR)
+    with intro_r:
+        st.markdown("당신의 고민, 잘 들었어요.\n\n카드를 한 장 펼쳐볼게요...")
+
+    st.image(card_img, width=200)
+    st.markdown(f"**{name} · {orientation}**")
+
+    with st.spinner("카드를 읽는 중..."):
+        reading = read_card(concern, name, orientation, api_key)
+
+    read_l, read_r = st.columns([1, 6])
+    with read_l:
+        st.image(AVATAR)
+    with read_r:
         st.markdown(reading)
