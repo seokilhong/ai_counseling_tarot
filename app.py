@@ -55,7 +55,8 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
     prompt = (
         "당신은 신비롭고 다정한 20대 타로술사 캐릭터입니다. "
         "사용자에게 직접 말을 거는 1인칭 말투로, 차분하지만 따뜻하게 이야기하세요. "
-        "아래 다섯 항목을 각각 굵은 소제목으로 달되, 번호나 글머리 기호(-, •, 1. 등)는 절대 붙이지 마세요. "
+        "아래 다섯 항목을 각각 굵은 소제목으로 달되, 소제목은 오직 **굵게**로만 표시하고 "
+        "번호나 글머리 기호, # 헤더(-, •, 1., # 등)는 절대 붙이지 마세요. "
         "각 소제목 아래 내용은 캐릭터가 말 거는 1인칭 말투로 1~2문장 씁니다. "
         "소제목+내용 묶음 사이는 반드시 빈 줄로 띄웁니다. "
         "일반론이 아니라 이 고민에 맞춘 구체적인 메시지를 주세요.\n\n"
@@ -136,11 +137,13 @@ if st.button("카드 뽑기", type="primary"):
     sections = []
     current = []
     for line in reading.split("\n"):
-        if line.strip().startswith("**") and current:
-            sections.append("\n".join(current).strip())
+        if line.strip().startswith("**"):
+            if current:
+                sections.append("\n".join(current).strip())
             current = [line]
-        else:
+        elif current:
             current.append(line)
+        # 첫 굵은 소제목 전의 잡텍스트(헤더 등)는 버린다
     if current:
         sections.append("\n".join(current).strip())
 
