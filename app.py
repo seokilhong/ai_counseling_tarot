@@ -5,6 +5,10 @@ import streamlit as st
 import anthropic
 from PIL import Image
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMG_DIR = os.path.join(BASE_DIR, "images")
+CHARACTER_IMG = os.path.join(BASE_DIR, "character.png")
+
 # 메이저 아르카나 22장: (표시명, 이미지 파일명)
 MAJOR_ARCANA = [
     ("0. 바보 (The Fool)", "RWS_Tarot_00_Fool.jpg"),
@@ -32,7 +36,6 @@ MAJOR_ARCANA = [
 ]
 
 MODEL = "claude-haiku-4-5-20251001"  # 타로 해석은 가벼워서 haiku로 충분
-IMG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "images")
 
 
 def get_api_key():
@@ -49,9 +52,10 @@ def get_api_key():
 def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
     client = anthropic.Anthropic(api_key=api_key)
     prompt = (
-        "당신은 따뜻하지만 막연하지 않은 타로 리더입니다. "
-        "사용자의 고민과 뽑힌 카드를 바탕으로, 아래 다섯 항목을 각각 굵은 제목으로 구분해 해석해 주세요. "
-        "각 항목은 굵은 제목 뒤에 1~2문장으로 짧게 쓰고, 항목과 항목 사이는 반드시 빈 줄로 띄웁니다. "
+        "당신은 신비롭고 다정한 20대 타로술사 캐릭터입니다. "
+        "사용자에게 직접 말을 거는 1인칭 말투로, 차분하지만 따뜻하게 이야기하세요. "
+        "아래 다섯 항목을 각각 굵은 제목으로 구분하고, 각 항목은 1~2문장으로 캐릭터가 말하듯 씁니다. "
+        "항목과 항목 사이는 반드시 빈 줄로 띄웁니다. "
         "일반론이 아니라 이 고민에 맞춘 구체적인 메시지를 주세요.\n\n"
         "**1. 지금 당신의 상황**\n"
         "**2. 그 밑에 깔린 마음**\n"
@@ -60,7 +64,6 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
         "**5. 오늘 해볼 행동** (구체적인 행동 하나)\n\n"
         f"고민: {concern}\n"
         f"뽑힌 카드: {card} ({orientation})\n\n"
-        "해석:"
     )
     msg = client.messages.create(
         model=MODEL,
@@ -70,8 +73,18 @@ def read_card(concern: str, card: str, orientation: str, api_key: str) -> str:
     return msg.content[0].text
 
 
+st.set_page_config(page_title="타로 한 장", page_icon="🔮")
+
 st.title("🔮 타로 한 장")
-st.caption("고민을 한 줄 적고 카드를 뽑으세요. 메이저 아르카나 22장 중 한 장이 나옵니다.")
+
+intro_col1, intro_col2 = st.columns([1, 2])
+with intro_col1:
+    st.image(CHARACTER_IMG, width=150)
+with intro_col2:
+    st.markdown(
+        "**신비로운 타로술사**가 당신의 고민을 들어드립니다.\n\n"
+        "고민을 한 줄 적고 카드를 뽑아보세요. 메이저 아르카나 22장 중 한 장이 나옵니다."
+    )
 
 concern = st.text_input(
     "오늘의 고민",
@@ -86,12 +99,9 @@ if st.button("카드 뽑기", type="primary"):
     name, filename = random.choice(MAJOR_ARCANA)
     orientation = random.choice(["정방향", "역방향"])
 
-    img = Image.open(os.path.join(IMG_DIR, filename))
+    card_img = Image.open(os.path.join(IMG_DIR, filename))
     if orientation == "역방향":
-        img = img.rotate(180)
-
-    st.markdown(f"### {name} · {orientation}")
-    st.image(img, width=300)
+        card_img = card_img.rotate(180)
 
     api_key = get_api_key()
     if not api_key:
@@ -103,7 +113,10 @@ if st.button("카드 뽑기", type="primary"):
         )
         st.stop()
 
-    with st.spinner("카드를 읽는 중..."):
-        reading = read_card(concern, name, orientation, api_key)
-
-    st.write(reading)
+    with st.chat_message("assistant", avatar=CHARACTER_IMG):
+        st.markdown("당신의 고민, 잘 들었어요. 카드를 한 장 펼쳐볼게요...")
+        st.image(card_img, width=240)
+        st.markdown(f"**{name} · {orientation}**")
+        with st.spinner("카드를 읽는 중..."):
+            reading = read_card(concern, name, orientation, api_key)
+        st.markdown(reading)
